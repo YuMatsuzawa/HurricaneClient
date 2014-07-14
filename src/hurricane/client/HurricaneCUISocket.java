@@ -21,9 +21,6 @@ public class HurricaneCUISocket {
 	private Session session;
 	private String nickname;
 	
-	/* Hurricane TextMessage must be the form of "<an alphabetic character><space><optional numeric number up to 8 digits>".
-	 * Below we listed preset message types.
-	 */
 	
 	public HurricaneCUISocket(String nickname) {
 		this.nickname = nickname;

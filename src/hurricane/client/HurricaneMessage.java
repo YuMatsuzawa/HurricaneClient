@@ -4,7 +4,8 @@
 package hurricane.client;
 
 
-/**
+/** Hurricane TextMessage must be the form of "<an alphabetic character><space><optional numeric number up to 8 digits>".
+ * Below we listed preset message types.
  * @author Romancer
  *
  */
