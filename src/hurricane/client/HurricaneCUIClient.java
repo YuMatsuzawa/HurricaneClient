@@ -29,7 +29,7 @@ public class HurricaneCUIClient {
 		}
 		
 		WebSocketClient client = new WebSocketClient();
-		HurricaneCUISocket socket = new HurricaneCUISocket(nickname);
+		HurricaneClientSocket socket = new HurricaneClientSocket(nickname);
 		try {
 			client.start();
 			URI hurricaneUri = new URI(dest);

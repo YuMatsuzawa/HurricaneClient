@@ -16,13 +16,13 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
  *
  */
 @WebSocket(maxTextMessageSize = 128)
-public class HurricaneCUISocket {
+public class HurricaneClientSocket {
 
 	private Session session;
 	private String nickname;
 	
 	
-	public HurricaneCUISocket(String nickname) {
+	public HurricaneClientSocket(String nickname) {
 		this.nickname = nickname;
 	}
 
