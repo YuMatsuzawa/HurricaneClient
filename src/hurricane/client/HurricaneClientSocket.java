@@ -5,6 +5,7 @@ package hurricane.client;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -23,11 +24,13 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 public class HurricaneClientSocket {
 
 	private Session session;
+	private CountDownLatch closeLatch;
 	private String nickname;
 	private String sendTo;
 	
-	public HurricaneClientSocket(String nickname) {
+	public HurricaneClientSocket(String nickname, CountDownLatch closeLatch) {
 		this.nickname = nickname;
+		this.closeLatch = closeLatch;
 	}
 
 	/**Handler of onConnect event. Run the first input waiting loop and accept a stdin input as destination username.<br>
@@ -56,7 +59,7 @@ public class HurricaneClientSocket {
 	
 	/**Handler of onClose event. This event could be thrown in one of two ways: closed by server, or closed by client.<br>
 	 * If the session was closed by the server, there must be StatusCode or Reason got passed, read them and react appropriately.<br>
-	 * If closed by the client, same treatment, but you may prompt the socket or the client as you wish (no need to retry etc.)<br>
+	 * If closed by the client, same treatment, but you may close the socket or the client as you wish (no need to retry etc.)<br>
 	 * @param session
 	 */
 	@OnWebSocketClose
@@ -64,12 +67,15 @@ public class HurricaneClientSocket {
 		switch(statusCode) {
 		case StatusCode.NORMAL :
 			//to be implemented
+			this.closeLatch.countDown();
 			return;
 		case StatusCode.SERVER_ERROR :
 			//to be implemented
+			this.closeLatch.countDown();
 			return;
 		default :
 			//to be implemented
+			this.closeLatch.countDown();
 			return;
 		}
 	}
