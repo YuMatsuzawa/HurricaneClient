@@ -18,6 +18,7 @@ import org.eclipse.jetty.websocket.client.WebSocketClient;
  */
 public class HurricaneCUIClient {
 	public static final int PORT = 80;
+	public static final String END_POINT = "/hurricane";
 	private static CountDownLatch closeLatch;
 	
 
@@ -32,7 +33,7 @@ public class HurricaneCUIClient {
 			System.out.println("Usage: <server host> <nickname>");
 			System.exit(1);
 		} else {
-			dest = "ws://" + args[0] + ":" + PORT;
+			dest = "ws://" + args[0] + ":" + PORT + END_POINT;
 			nickname = args[1];
 		}
 		
@@ -42,6 +43,7 @@ public class HurricaneCUIClient {
 			client.start();
 			URI hurricaneUri = new URI(dest);
 			ClientUpgradeRequest request = new ClientUpgradeRequest();
+			request.setSubProtocols("text");
 			request.setHeader("user", nickname);							//sending user nickname <<here>>
 			Future<Session> fut = client.connect(socket, hurricaneUri, request);
 			System.out.printf("Connecting to %s\n", hurricaneUri);
@@ -50,6 +52,7 @@ public class HurricaneCUIClient {
 				closeLatch.await();
 			} catch (Exception e) {
 				System.err.printf("Could not connect to %s (%s)\n", hurricaneUri, e.getCause().getMessage());
+//				e.printStackTrace();
 			}
 		} catch (Exception e){
 			e.printStackTrace();
