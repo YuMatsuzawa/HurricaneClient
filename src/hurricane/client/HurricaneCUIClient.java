@@ -6,7 +6,6 @@ package hurricane.client;
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
@@ -44,11 +43,11 @@ public class HurricaneCUIClient {
 			URI hurricaneUri = new URI(dest);
 			ClientUpgradeRequest request = new ClientUpgradeRequest();
 			request.setSubProtocols("text");
-//			request.setHeader("user", nickname);							//sending user nickname <<here>>
+			request.setHeader("user", nickname);							//sending user nickname <<here>>
 			Future<Session> fut = client.connect(socket, hurricaneUri, request);
 			System.out.printf("Connecting to %s\n", hurricaneUri);
 			try {
-				fut.get(10, TimeUnit.SECONDS);
+//				fut.get(10, TimeUnit.SECONDS);
 				closeLatch.await();
 			} catch (Exception e) {
 				System.err.printf("Could not connect to %s (%s)\n", hurricaneUri, e.getCause().getMessage());
