@@ -43,7 +43,7 @@ public class HurricaneCUIClient {
 			URI hurricaneUri = new URI(dest);
 			ClientUpgradeRequest request = new ClientUpgradeRequest();
 			request.setSubProtocols("text");
-			request.setHeader("user", nickname);							//sending user nickname <<here>>
+			request.setHeader("user", socket.nickname);							//sending user nickname <<here>>
 			Future<Session> fut = client.connect(socket, hurricaneUri, request);
 			System.out.printf("Connecting to %s\n", hurricaneUri);
 			try {
