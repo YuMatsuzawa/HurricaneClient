@@ -34,6 +34,8 @@ public class HurricaneClientSocket {
 	private String sendTo;
 	
 	private BufferedReader globalReader = null;
+
+	private boolean incoming = false;
 	
 	public HurricaneClientSocket(String nickname, CountDownLatch closeLatch) {
 		this.nickname = nickname;
@@ -214,10 +216,12 @@ public class HurricaneClientSocket {
 	 */
 	private void assortTextMessage(String text) {
 		String[] splitText = text.split("\\s");
-		if (splitText[0].equals(HurricaneMessage.SOCK_USER)) {
+		if (splitText[0].equals(HurricaneMessage.SOCK_ACK)) {
+			this.messagePrompt();
+		} else if (splitText[0].equals(HurricaneMessage.SOCK_USER)) {
 			this.setSendTo(splitText);
 		} else {
-			System.out.println(this.sendTo + SCREEN_DELIM + this.textMessageToOutput(splitText));
+			System.out.printf("[%s]%s%s\n", this.sendTo, SCREEN_DELIM, this.textMessageToOutput(splitText));
 			this.messagePrompt();
 		}
 	}
@@ -257,14 +261,16 @@ public class HurricaneClientSocket {
 		try {
 //			br = new BufferedReader(new InputStreamReader(System.in));
 			String stdin;
-			while (this.closeLatch.getCount() > 0) { // message loop. never breaks.
+//			while (this.closeLatch.getCount() > 0) { // message loop. never breaks.
+//			while (!incoming) {
 //				while((stdin = br.readLine()) != null) {
 //				stdin = br.readLine();
-				stdin = this.globalReader.readLine();
-				fut = this.session.getRemote().sendStringByFuture(this.inputToTextMessage(stdin));
+				if ((stdin = this.globalReader.readLine()) != null && !stdin.isEmpty()) {
+					fut = this.session.getRemote().sendStringByFuture(this.inputToTextMessage(stdin));
+				}
 //				}
-				if (fut.isCancelled()) System.err.println("Could not send a message.");
-			}
+//				if (fut.isCancelled()) System.err.println("Could not send a message.");
+//			}
 		} catch (IOException e) {
 			System.err.println(e.toString());
 		} catch (Exception e) {
