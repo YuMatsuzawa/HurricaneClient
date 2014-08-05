@@ -44,19 +44,24 @@ public class HurricaneCUIClient {
 			ClientUpgradeRequest request = new ClientUpgradeRequest();
 			request.setSubProtocols("text");
 			request.setHeader("user", socket.nickname);							//sending user nickname <<here>>
-			Future<Session> fut = client.connect(socket, hurricaneUri, request);
+			Future<Session> fut = null;
+			fut = client.connect(socket, hurricaneUri, request);
 			System.out.printf("Connecting to %s\n", hurricaneUri);
 			try {
 //				fut.get(10, TimeUnit.SECONDS);
+//				if (!fut.isDone()) {
+//					System.err.printf("Could not connect to %s\n", hurricaneUri);
+//				}
 				closeLatch.await();
 			} catch (Exception e) {
 				System.err.printf("Could not connect to %s (%s)\n", hurricaneUri, e.getCause().getMessage());
-				e.printStackTrace();
+				//					e.printStackTrace();
 			}
 		} catch (Exception e){
-			e.printStackTrace();
+//			e.printStackTrace();
 		} finally {
 			try {
+//				System.out.println("Latch down.");
 				client.stop();
 			} catch (Exception e) {
 				e.printStackTrace();

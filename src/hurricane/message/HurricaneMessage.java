@@ -19,7 +19,7 @@ public class HurricaneMessage {
 	public static final String SOCK_NO = "n";
 	public static final String SOCK_NUMERIC = "x";
 	
-//	private static String[] SOCKS_ARRAY = {SOCK_USER, SOCK_HURRICANE, SOCK_GO, SOCK_NO, SOCK_NUMERIC};
+//	public static final String[] NORMAL_SOCK = {SOCK_HURRICANE, SOCK_GO, SOCK_NO, SOCK_NUMERIC};
 
 	public static final String SCREEN_HURRICANE = "Hurricane";
 	public static final String SCREEN_GO = "Go";

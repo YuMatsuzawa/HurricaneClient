@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
+import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -32,9 +33,12 @@ public class HurricaneClientSocket {
 	protected String nickname;
 	private String sendTo;
 	
+	private BufferedReader globalReader = null;
+	
 	public HurricaneClientSocket(String nickname, CountDownLatch closeLatch) {
 		this.nickname = nickname;
 		this.closeLatch = closeLatch;
+		this.globalReader = new BufferedReader(new InputStreamReader(System.in));
 	}
 
 	/**Handler of onConnect event. Run the first input waiting loop and accept a stdin input as destination username.<br>
@@ -74,23 +78,35 @@ public class HurricaneClientSocket {
 	 */
 	private void sendToPrompt() {
 		Future<Void> fut = null;
-		BufferedReader br = null;
+//		BufferedReader br = null;
 		try {
 			//sending target name.
-			br = new BufferedReader(new InputStreamReader(System.in));
+//			br = new BufferedReader(new InputStreamReader(System.in));
 			System.out.print("Send to: ");
 			String stdin;
-			while((stdin = br.readLine()) != null) {
-				fut = this.session.getRemote().sendStringByFuture(HurricaneMessage.SOCK_USER + stdin);
+//			while((stdin = br.readLine()) != null) {
+			while (true) {
+//				stdin = br.readLine();
+				stdin = this.globalReader.readLine();
+				fut = this.session.getRemote().sendStringByFuture(HurricaneMessage.SOCK_USER
+						+ HurricaneMessage.TEXT_DELIM + stdin);
+				if (fut.isDone()) break;
 			}
+//			}
+		} catch (IOException e) {
+//			System.err.println(e.toString());
+			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				br.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+//			try {
+//				br.close();
+//			} catch (IOException e) {
+//				System.err.println(e.toString());
+////				e.printStackTrace();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 		}
 	}
 	
@@ -104,15 +120,36 @@ public class HurricaneClientSocket {
 		switch(statusCode) {
 		case StatusCode.NORMAL :
 			//to be implemented
+			this.session = null;
+			System.out.printf("Connection closed. [%d]", statusCode);
 			this.closeLatch.countDown();
+//			try {
+//				this.globalReader.close();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 			return;
 		case StatusCode.SERVER_ERROR :
 			//to be implemented
+			this.session = null;
+			System.out.printf("Connection closed. [%d]", statusCode);
 			this.closeLatch.countDown();
+//			try {
+//				this.globalReader.close();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 			return;
 		default :
 			//to be implemented
+			this.session = null;
+			System.out.printf("Connection closed. [%d]", statusCode);
 			this.closeLatch.countDown();
+//			try {
+//				this.globalReader.close();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 			return;
 		}
 	}
@@ -156,7 +193,8 @@ public class HurricaneClientSocket {
 		}
 		for (String word : words) {
 			if (word.matches("\\d+")) { 							// If the word only contains number, they are trimmed into 8-digit number then attached.
-				optNum = word.substring(0, 8);
+				optNum = word;
+				if (optNum.length() > 8) optNum = optNum.substring(0, 8);
 			} else {
 				String tmpText = HurricaneMessage.getSockMessage(word);
 				if (isU && !tmpText.equals(HurricaneMessage.SOCK_USER)) {		// If "u" method already declared, unparsable input will be considered as username.
@@ -193,18 +231,18 @@ public class HurricaneClientSocket {
 	private void setSendTo(String[] splitTextMessageU) {
 		if (splitTextMessageU.length > 2) {
 			String optNum = splitTextMessageU[2];
-			if (optNum == "404") {
+			if (optNum.equals(String.valueOf(HttpStatus.NOT_FOUND_404))) {
 				System.out.printf("User %s does not exist.\n", splitTextMessageU[1]);
 				this.sendToPrompt();
 			} else {
 				// Ignore other optNum.
 				this.sendTo = splitTextMessageU[1];
-				System.out.printf("Hurricane with %s!\n", splitTextMessageU[1]);
+				System.out.printf("Hurricane with %s!\n", this.sendTo);
 				this.messagePrompt();
 			}
 		} else {
 			this.sendTo = splitTextMessageU[1];
-			System.out.printf("Hurricane with %s!\n", splitTextMessageU[1]);
+			System.out.printf("Hurricane with %s!\n", this.sendTo);
 			this.messagePrompt();
 		}
 	}
@@ -215,23 +253,31 @@ public class HurricaneClientSocket {
 	 */
 	private void messagePrompt() {
 		Future<Void> fut = null;
-		BufferedReader br = null;
+//		BufferedReader br = null;
 		try {
-			br = new BufferedReader(new InputStreamReader(System.in));
+//			br = new BufferedReader(new InputStreamReader(System.in));
 			String stdin;
-			while (this.closeLatch.getCount() > 0) { // message loop
-				while((stdin = br.readLine()) != null) {
-					fut = this.session.getRemote().sendStringByFuture(HurricaneMessage.SOCK_USER + stdin);
-				}
+			while (this.closeLatch.getCount() > 0) { // message loop. never breaks.
+//				while((stdin = br.readLine()) != null) {
+//				stdin = br.readLine();
+				stdin = this.globalReader.readLine();
+				fut = this.session.getRemote().sendStringByFuture(this.inputToTextMessage(stdin));
+//				}
+				if (fut.isCancelled()) System.err.println("Could not send a message.");
 			}
+		} catch (IOException e) {
+			System.err.println(e.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				br.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+//			try {
+//				br.close();
+//			} catch (IOException e) {
+//				System.err.println(e.toString());
+////				e.printStackTrace();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 		}
 		
 	}
